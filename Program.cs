@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http.Json;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -55,12 +56,44 @@ app.MapPost("/api/users/new", (BangazonDbContext db, User user) =>
 });
 
 app.MapGet("/api/users/{userId}", (BangazonDbContext db, int userId) => {
-    User user = db.Users.FirstOrDefault(u => u.Id == userId);
+    User user = db.Users.SingleOrDefault(u => u.Id == userId);
     if (user == null)
     {
         return Results.NotFound();
     }
     return Results.Ok(user);
+});
+
+app.MapDelete("/api/users/{userId}", (BangazonDbContext db, int userId) =>
+{
+    User user = db.Users.SingleOrDefault(u => u.Id == userId);
+    if (user == null)
+    {
+        return Results.NotFound();
+    }
+    db.Users.Remove(user);
+    db.SaveChanges();
+    return Results.NoContent();
+
+});
+
+app.MapPut("/api/users/{id}", (BangazonDbContext db, int id, User user) =>
+{
+    User userToUpdate = db.Users.SingleOrDefault(u => u.Id == id);
+    if (userToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+    userToUpdate.Username = user.Username;
+    userToUpdate.FirstName = user.FirstName;
+    userToUpdate.LastName = user.LastName;
+    userToUpdate.Email = user.Email;
+    userToUpdate.Address = user.Address;
+    userToUpdate.ImageUrl = user.ImageUrl;
+    userToUpdate.IsSeller = user.IsSeller;
+
+    db.SaveChanges();
+    return Results.NoContent();
 });
 
 app.Run();
