@@ -1,4 +1,5 @@
-﻿namespace Bangazon.Models
+﻿
+namespace Bangazon.Models
 {
     public class Category
     {
