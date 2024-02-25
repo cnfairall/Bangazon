@@ -1,4 +1,5 @@
-﻿namespace Bangazon.Models
+﻿
+namespace Bangazon.Models
 {
     public class User
     {
@@ -11,6 +12,7 @@
         public string Address { get; set; }
         public string ImageUrl { get; set; }
         public bool IsSeller { get; set; }
+        public ICollection<Product> Products { get; set; }
 
     }
 }

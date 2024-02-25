@@ -6,7 +6,7 @@ public class BangazonDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Product> Products { get; set; }
-    public DbSet<Order> Order { get; set; }
+    public DbSet<Order> Orders {  get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<PaymentType> PaymentTypes { get; set; }
     public BangazonDbContext(DbContextOptions<BangazonDbContext> context) : base(context)
