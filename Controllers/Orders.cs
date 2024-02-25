@@ -45,7 +45,7 @@ namespace Bangazon.Controllers
                     return db.Orders
                     .Include(o => o.Products)
                     .ThenInclude(p => p.Seller)
-                    .SingleOrDefault(o => o.Id == id);
+                    .SingleOrDefault(o => o.Id == id && o.Open == false);
                 }
                 return null;
             });
