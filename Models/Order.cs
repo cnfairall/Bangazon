@@ -11,7 +11,16 @@ namespace Bangazon.Models
         public DateTime? DatePlaced { get; set; }
         public int? PaymentTypeId { get; set; }
         public ICollection<Product> Products { get; set; }
-
-
+        public decimal? TotalCost
+        {
+            get
+            {
+                if (Products != null)
+                {
+                    return Products.Sum(p => p.PricePer);
+                }
+                return null;
+            }
+        }
     }
 }
