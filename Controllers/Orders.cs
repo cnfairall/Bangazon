@@ -24,19 +24,20 @@ namespace Bangazon.Controllers
                 return Results.Created($"/api/{userId}/orders/{cart.Id}", cart);
             });
 
-            //get list of user's orders
-            app.MapGet("/api/{userId}/orders", (BangazonDbContext db, int userId) =>
+            //get cart
+            app.MapGet("/api/{userId}/cart", (BangazonDbContext db, int userId) =>
             {
-                if (userId != null)
+                Order cart = db.Orders
+                .Include(o => o.Products)
+                .SingleOrDefault(o => o.CustomerId == userId && o.Open == true);
+                if (cart != null)
                 {
-                    List<Order> userOrders = db.Orders.Where(o => o.CustomerId == userId).ToList();
-                    return userOrders;
-
+                    return cart;
                 }
                 return null;
             });
 
-            //get order details
+            //get single order details (in history)
             app.MapGet("/api/orders/{id}", (BangazonDbContext db, int id) =>
             {
                 if (id != null)
@@ -47,6 +48,34 @@ namespace Bangazon.Controllers
                     .SingleOrDefault(o => o.Id == id);
                 }
                 return null;
+            });
+
+            //get order history (list)
+            app.MapGet("/api/{userId}/history", (BangazonDbContext db, int userId) =>
+            {
+                List<Order> orderHistory = db.Orders
+                    .Where(o => o.CustomerId == userId && o.Open == false)
+                    .ToList();
+                if (userId == null)
+                {
+                    return Results.BadRequest();
+                }
+                return Results.Ok(orderHistory);
+            });
+
+
+            //get order history with products
+            app.MapGet("/api/{userId}/orders", (BangazonDbContext db, int userId) =>
+            {
+                List<Order> orderHistory = db.Orders
+                    .Include(o => o.Products)
+                    .Where(o => o.CustomerId == userId && o.Open == false)
+                    .ToList();
+                if (userId == null)
+                {
+                    return Results.BadRequest();
+                }
+                return Results.Ok(orderHistory);
             });
         }
     }
