@@ -16,15 +16,23 @@ namespace Bangazon.Controllers
                 .SingleOrDefault(o => o.Id == orderProduct.OrderId);
                 Product productToAdd = db.Products
                 .SingleOrDefault(p => p.Id == orderProduct.ProductId);
+                if (orderToUpdate == null)
+                {
+                    return Results.BadRequest("Order not found");
+                }
                 try
                 {
                     orderToUpdate.Products.Add(productToAdd);
                     db.SaveChanges();
                     return Results.NoContent();
                 }
-                catch (DbUpdateException)
+                catch (NullReferenceException)
                 {
-                    return Results.BadRequest("Invalid data submitted");
+                    return Results.BadRequest("Order not found");
+                }
+                catch (ArgumentNullException)
+                {
+                    return Results.BadRequest("Product not found");
                 }
             });
 
