@@ -9,31 +9,54 @@ namespace Bangazon.Controllers
         public static void Map(WebApplication app)
         {
             //add product to cart
-            app.MapPatch("/api/order/add", (BangazonDbContext db, AddToCartDto orderProduct) =>
+            app.MapPatch("/api/cart/add", (BangazonDbContext db, AddToCartDto orderProduct) =>
             {
-                Order orderToUpdate = db.Orders
-                .Include(o => o.Products)
-                .SingleOrDefault(o => o.Id == orderProduct.OrderId);
+                Order cart = db.Orders
+                                .Include(o => o.Products)
+                                .SingleOrDefault(o => o.Id == orderProduct.OrderId && o.Open == true);
                 Product productToAdd = db.Products
-                .SingleOrDefault(p => p.Id == orderProduct.ProductId);
-                if (orderToUpdate == null)
+                                          .SingleOrDefault(p => p.Id == orderProduct.ProductId);
+                if (cart == null)
                 {
-                    return Results.BadRequest("Order not found");
+                    return Results.BadRequest("Invalid data submitted");
                 }
                 try
                 {
-                    orderToUpdate.Products.Add(productToAdd);
+                    cart.Products.Add(productToAdd);
                     db.SaveChanges();
                     return Results.NoContent();
-                }
-                catch (NullReferenceException)
-                {
-                    return Results.BadRequest("Order not found");
                 }
                 catch (ArgumentNullException)
                 {
                     return Results.BadRequest("Product not found");
                 }
+            });
+
+            //remove product from cart
+            app.MapPatch("/api/cart/remove", (BangazonDbContext db, DeleteFromCartDto orderProduct) =>
+            {
+                Order cart = db.Orders
+                            .Include(o => o.Products)
+                            .SingleOrDefault(o => o.Id == orderProduct.OrderId && o.Open == true);
+                if (cart == null)
+                {
+                    return Results.BadRequest("Invalid data submitted");
+                }
+                if (cart.Products.Count < 1)
+                {
+                    return Results.BadRequest("Cart is empty");
+                }
+                Product productToRemove = cart.Products
+                                           .SingleOrDefault(p => p.Id == orderProduct.ProductId);
+                if (productToRemove == null)
+                {
+                    return Results.BadRequest("Product not found in cart");
+                }
+               
+                cart.Products.Remove(productToRemove);
+                db.SaveChanges();
+                return Results.NoContent();
+                
             });
 
             //view product details

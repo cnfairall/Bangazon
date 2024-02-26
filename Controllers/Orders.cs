@@ -1,4 +1,5 @@
-﻿using Bangazon.Models;
+﻿using Bangazon.Dtos;
+using Bangazon.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bangazon.Controllers
@@ -28,13 +29,34 @@ namespace Bangazon.Controllers
             app.MapGet("/api/{userId}/cart", (BangazonDbContext db, int userId) =>
             {
                 Order cart = db.Orders
-                .Include(o => o.Products)
-                .SingleOrDefault(o => o.CustomerId == userId && o.Open == true);
+                                .Include(o => o.Products)
+                                .SingleOrDefault(o => o.CustomerId == userId && o.Open == true);
                 if (cart != null)
                 {
                     return cart;
                 }
                 return null;
+            });
+
+            //place order
+            app.MapPatch("/api/cart/close", (BangazonDbContext db, CloseCartDto dto) =>
+            {
+                Order cart = db.Orders
+                                .Include(o => o.Products)
+                                .SingleOrDefault(o => o.Id == dto.OrderId && o.Open == true);
+                if (cart == null )
+                {
+                    return Results.BadRequest("Cart not found");
+                }
+                if (cart.Products.Count < 1)
+                {
+                    return Results.BadRequest("Cart has no products");
+                }
+                cart.Open = false;
+                cart.DatePlaced = DateTime.Now;
+                cart.PaymentTypeId = dto.PaymentTypeId;
+                db.SaveChanges();
+                return Results.Ok(cart);
             });
 
             //get single order details (in history)
