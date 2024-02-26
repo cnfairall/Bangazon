@@ -1,6 +1,7 @@
 ﻿using Bangazon.Dtos;
 using Bangazon.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Data.SqlTypes;
 
 namespace Bangazon.Controllers
 {
@@ -98,6 +99,66 @@ namespace Bangazon.Controllers
                     return Results.BadRequest();
                 }
                 return Results.Ok(orderHistory);
+            });
+
+            //get seller's orders with customers
+            app.MapGet("/api/{userId}/dashboard/customers", (BangazonDbContext db, int userId) =>
+            {
+                if (userId != null)
+                {
+                    List<Order> sellerOrders = db.Orders
+                                                 .Include(o => o.Customer)
+                                                 .Where(o => o.Products.Any(p => p.SellerId == userId) && o.Open == false).ToList();
+                    if (sellerOrders == null)
+                    {
+                        return Results.NotFound("No orders found");
+                    }
+                    return Results.Ok(sellerOrders);
+                }
+                return Results.BadRequest("Invalid data submitted");
+            });
+
+            //get seller's orders with products
+            app.MapGet("/api/{userId}/dashboard/orders", (BangazonDbContext db, int userId) =>
+            {
+                if (userId != null)
+                {
+                    List<Order> sellerOrders = db.Orders
+                                                 .Include(o => o.Products)
+                                                 .Where(o => o.Products.Any(p => p.SellerId == userId) && o.Open == false).ToList();
+                    if (sellerOrders == null)
+                    {
+                        return Results.NotFound("No orders found");
+                    }
+                    return Results.Ok(sellerOrders);
+                }
+                return Results.BadRequest("Invalid data submitted");
+            });
+
+            //get dashboard stats
+            app.MapGet("/api/{userId}/dashboard", (BangazonDbContext db, int userId) =>
+            {
+                if (userId != null)
+                {
+                    List<Order> sales = db.Orders
+                                          .Include(o => o.Products)
+                                          .Where(o => o.Products.Any(p => p.SellerId == userId) && o.Open == false).ToList();
+                    Decimal totalSales = 0;
+                    if (sales == null)
+                    {
+                        return Results.NotFound("No orders found");
+                    }
+
+                    foreach (Order sale in sales)
+                    {
+                        var productTotal = sale.Products.Sum(p => p.PricePer);
+                        totalSales += productTotal;
+                    }
+                    return Results.Ok(totalSales);
+
+                }
+           
+                return Results.BadRequest("Invalid data submitted");
             });
         }
     }
