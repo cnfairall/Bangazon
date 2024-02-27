@@ -1,5 +1,6 @@
 ﻿using Bangazon.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace Bangazon.Controllers
 {
@@ -71,6 +72,46 @@ namespace Bangazon.Controllers
                 }
                 return store;
                
+            });
+
+            //search sellers
+            app.MapGet("/api/sellers/search/{query}", (BangazonDbContext db, string query) =>
+            {
+                List<User> sellers = db.Users.Where(u => u.IsSeller == true).ToList();
+                List<User> sellerResults = sellers.Where(u =>
+                                                u.FirstName.ToLower().Contains(query) ||
+                                                u.LastName.ToLower().Contains(query) ||
+                                                u.Email.ToLower().Contains(query) ||
+                                                u.Address.ToLower().Contains(query) ||
+                                                u.Username.ToLower().Contains(query))
+                                                .ToList();
+              
+                if (sellerResults.Count == 0)
+                {
+                    return Results.NotFound();
+                }
+                return Results.Ok(sellerResults);
+
+            });
+
+            //search customers
+            app.MapGet("/api/customers/search/{query}", (BangazonDbContext db, string query) =>
+            {
+                List<User> customers = db.Users.Where(u => u.IsSeller == false).ToList();
+                List<User> customerResults = customers.Where(u =>
+                                               u.FirstName.ToLower().Contains(query) ||
+                                               u.LastName.ToLower().Contains(query) ||
+                                               u.Email.ToLower().Contains(query) ||
+                                               u.Address.ToLower().Contains(query) ||
+                                               u.Username.ToLower().Contains(query))
+                                               .ToList();
+
+                if (customerResults.Count == 0)
+                {
+                    return Results.NotFound();
+                }
+                return Results.Ok(customerResults);
+
             });
         }
     }

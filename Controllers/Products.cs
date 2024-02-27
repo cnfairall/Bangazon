@@ -81,6 +81,18 @@ namespace Bangazon.Controllers
                 .ToList();
             });
 
+            //search products
+            app.MapGet("/api/products/search/{query}", (BangazonDbContext db, string query) =>
+            {
+                List<Product> searchResults = db.Products.Where(p => p.Title.Contains(query)).ToList();
+                if (searchResults.Count == 0)
+                {
+                    return Results.NotFound();
+                }
+                return Results.Ok(searchResults);
+            
+            });
+
         }
     }
 }
