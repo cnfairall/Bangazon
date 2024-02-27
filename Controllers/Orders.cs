@@ -144,7 +144,7 @@ namespace Bangazon.Controllers
                                           .Include(o => o.Products)
                                           .Where(o => o.Products.Any(p => p.SellerId == userId) && o.Open == false).ToList();
                     Decimal totalSales = 0;
-                    if (sales == null)
+                    if (sales.Count < 1)
                     {
                         return Results.NotFound("No orders found");
                     }
