@@ -2,6 +2,7 @@
 using Bangazon.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Data.SqlTypes;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Bangazon.Controllers
 {
@@ -136,7 +137,7 @@ namespace Bangazon.Controllers
             });
 
             //get dashboard stats
-            app.MapGet("/api/{userId}/dashboard", (BangazonDbContext db, int userId) =>
+            app.MapGet("/api/{userId}/dashboard/total", (BangazonDbContext db, int userId) =>
             {
                 if (userId != null)
                 {
@@ -144,6 +145,8 @@ namespace Bangazon.Controllers
                                           .Include(o => o.Products)
                                           .Where(o => o.Products.Any(p => p.SellerId == userId) && o.Open == false).ToList();
                     Decimal totalSales = 0;
+                    int productsSold = 0;
+
                     if (sales.Count < 1)
                     {
                         return Results.NotFound("No orders found");
@@ -152,9 +155,28 @@ namespace Bangazon.Controllers
                     foreach (Order sale in sales)
                     {
                         var productTotal = sale.Products.Sum(p => p.PricePer);
+                        int products = sale.Products.Count;
                         totalSales += productTotal;
+                        productsSold += products;
                     }
-                    return Results.Ok(totalSales);
+
+                    var averagePerItem = totalSales / productsSold;
+
+                    List<Order> salesThisMonth = db.Orders
+                                                   .Include(o => o.Products)
+                                                   .Where(o =>
+                                                   o.DatePlaced > DateTime.Today.AddDays(-30) &&
+                                                   o.Products.Any(p => p.SellerId == userId) && o.Open == false).ToList();
+                    Decimal monthEarnings = 0;
+                    foreach (Order sale in salesThisMonth)
+                    {
+                        var total = sale.Products.Sum(p => p.PricePer);
+                        monthEarnings += total;
+                    }
+
+                    List<Decimal> sellerStats = [ totalSales, averagePerItem, monthEarnings ];
+                    
+                    return Results.Ok(sellerStats);
 
                 }
            
