@@ -1,4 +1,4 @@
-﻿namespace Bangazon.Controllers
+﻿ namespace Bangazon.Controllers
 {
     public class PaymentTypes
     {

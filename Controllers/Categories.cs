@@ -26,7 +26,7 @@ namespace Bangazon.Controllers
             });
 
             //get 3 products for a category
-            app.MapGet("/api/categories/products", (BangazonDbContext db, int categoryId) =>
+            app.MapGet("/api/{categoryId}/products", (BangazonDbContext db, int categoryId) =>
             {
                 List<Product> categoryProducts = db.Products
                                                    .Where(p => p.CategoryId == categoryId)

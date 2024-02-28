@@ -94,7 +94,7 @@ namespace Bangazon.Controllers
             });
 
             //get seller's inventory by category
-            app.MapGet("/api/{userId}/store/categories", (BangazonDbContext db, int userId, int categoryId) =>
+            app.MapGet("/api/{userId}/store/{categoryId}", (BangazonDbContext db, int userId, int categoryId) =>
             {
                 User seller = db.Users
                              .Include(u => u.Products)
