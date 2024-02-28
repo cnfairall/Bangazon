@@ -94,18 +94,28 @@ namespace Bangazon.Controllers
             });
 
             //get seller's inventory by category
-            app.MapGet("/api/{userId}/store/categories", (BangazonDbContext db, int userId) =>
+            app.MapGet("/api/{userId}/store/categories", (BangazonDbContext db, int userId, int categoryId) =>
             {
-                User seller = db.Users.SingleOrDefault(u => u.Id == userId);
+                User seller = db.Users
+                             .Include(u => u.Products)
+                             .SingleOrDefault(u => u.Id == userId);
                 if (seller == null)
                 {
                     return Results.BadRequest("Invalid data submitted");
                 }
-                List<Product> store = seller.Products.ToList();
-                foreach (Product product in store)
+                if (seller.Products.Count == 0)
                 {
-
+                    return Results.NotFound("No products found");
                 }
+                List<Product> categoryProducts = seller.Products
+                .Where(p => p.CategoryId == categoryId)
+                .ToList();
+                if (categoryProducts.Count == 0)
+                {
+                    return Results.NotFound("No products found for this category");
+                }
+                return Results.Ok(categoryProducts);
+                
             });
 
         }
