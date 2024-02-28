@@ -93,6 +93,21 @@ namespace Bangazon.Controllers
             
             });
 
+            //get seller's inventory by category
+            app.MapGet("/api/{userId}/store/categories", (BangazonDbContext db, int userId) =>
+            {
+                User seller = db.Users.SingleOrDefault(u => u.Id == userId);
+                if (seller == null)
+                {
+                    return Results.BadRequest("Invalid data submitted");
+                }
+                List<Product> store = seller.Products.ToList();
+                foreach (Product product in store)
+                {
+
+                }
+            });
+
         }
     }
 }
