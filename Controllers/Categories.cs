@@ -25,20 +25,14 @@ namespace Bangazon.Controllers
                 return categoryTotals;
             });
 
-            //get products for each category
-            app.MapGet("/api/categories/products", (BangazonDbContext db) =>
+            //get 3 products for a category
+            app.MapGet("/api/categories/products", (BangazonDbContext db, int categoryId) =>
             {
-                List<Product> productsByCategory = new List<Product>();
-                List<Category> categories = db.Categories.ToList();
-                foreach (Category category in categories)
-                {
-                    List<Product> categoryProducts = db.Products
-                                                        .Where(p => p.CategoryId == category.Id)
-                                                        .Take(3)
-                                                        .ToList();
-                    productsByCategory.AddRange(categoryProducts);
-                }
-                return productsByCategory;
+                List<Product> categoryProducts = db.Products
+                                                   .Where(p => p.CategoryId == categoryId)
+                                                   .Take(3)
+                                                   .ToList();
+                return categoryProducts;
             });
         }
     }
