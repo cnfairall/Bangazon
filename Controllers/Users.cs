@@ -9,11 +9,11 @@ namespace Bangazon.Controllers
         public static void Map(WebApplication app)
         {
             //add user
-            app.MapPost("/api/users/new", (BangazonDbContext db, User user) =>
+            app.MapPost("/api/users/new", (BangazonDbContext db, User newUser) =>
             {
-                db.Users.Add(user);
+                db.Users.Add(newUser);
                 db.SaveChanges();
-                return Results.Created($"/api/users/{user.Id}", user);
+                return Results.Created($"/api/users/{newUser.Id}", newUser);
             });
 
             //get user
@@ -57,7 +57,7 @@ namespace Bangazon.Controllers
                 userToUpdate.IsSeller = user.IsSeller;
 
                 db.SaveChanges();
-                return Results.NoContent();
+                return Results.Ok(user);
             });
 
             //get user's store
@@ -88,7 +88,7 @@ namespace Bangazon.Controllers
               
                 if (sellerResults.Count == 0)
                 {
-                    return Results.NotFound();
+                    return Results.NotFound("No sellers found");
                 }
                 return Results.Ok(sellerResults);
 
@@ -108,21 +108,24 @@ namespace Bangazon.Controllers
 
                 if (customerResults.Count == 0)
                 {
-                    return Results.NotFound();
+                    return Results.NotFound("No customers found");
                 }
                 return Results.Ok(customerResults);
 
             });
 
             //check user
-            app.MapPost("/api/checkUser/{uid}", (BangazonDbContext db, string uid) =>
+            app.MapGet("/api/checkUser/{uid}", (BangazonDbContext db, string uid) =>
             {
-                User checkUser = db.Users.FirstOrDefault(u => u.Uid == uid);
-                if (checkUser == null)
+                var user = db.Users.Where(u => u.Uid == uid).ToList();
+                if (uid == null)
                 {
                     return Results.NotFound();
+                } else
+                {
+                    return Results.Ok(user);
+
                 }
-                return Results.Ok(checkUser);
             });
         }
     }
