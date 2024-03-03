@@ -24,7 +24,7 @@ namespace Bangazon.Controllers
                 {
                     cart.Products.Add(productToAdd);
                     db.SaveChanges();
-                    return Results.NoContent();
+                    return Results.Ok(productToAdd);
                 }
                 catch (ArgumentNullException)
                 {

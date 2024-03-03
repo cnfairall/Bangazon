@@ -61,7 +61,7 @@ namespace Bangazon.Controllers
             });
 
             //get user's store
-            app.MapGet("/api/{userId}/store", (BangazonDbContext db, int userId) =>
+            app.MapGet("/api/store/{userId}", (BangazonDbContext db, int userId) =>
             {
                 var store = db.Users
                     .Include(u => u.Products)
@@ -70,7 +70,7 @@ namespace Bangazon.Controllers
                 {
                     return null;
                 }
-                return store;
+                return Results.Ok(store);
                
             });
 
