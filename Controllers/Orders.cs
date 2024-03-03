@@ -10,21 +10,25 @@ namespace Bangazon.Controllers
     {
         public static void Map(WebApplication app)
         {
-            //open cart (on log in or placing order)
-            app.MapPost("/api/orders/new", (BangazonDbContext db, int userId) =>
+            //check/create cart
+            app.MapGet("/api/{userId}/cart/open", (BangazonDbContext db, int userId) =>
             {
-                Order openOrder = db.Orders.SingleOrDefault(o => o.CustomerId == userId && o.Open == true);
-                if (openOrder != null)
+                Order cart = db.Orders
+                                .Include(o => o.Products)
+                                .SingleOrDefault(o => o.CustomerId == userId && o.Open == true);
+                if (cart != null)
                 {
-                    return Results.BadRequest(openOrder);
-                }
+                    return Results.Ok("Cart exists");
+                } else
+                {
 
-                Order cart = new Order();
-                cart.CustomerId = userId;
-                cart.Open = true;
-                db.Orders.Add(cart);
+                Order newCart = new Order();
+                newCart.CustomerId = userId;
+                newCart.Open = true;
+                db.Orders.Add(newCart);
                 db.SaveChanges();
-                return Results.Created($"/api/{userId}/orders/{cart.Id}", cart);
+                return Results.Ok(newCart);
+                }
             });
 
             //get cart
@@ -35,9 +39,17 @@ namespace Bangazon.Controllers
                                 .SingleOrDefault(o => o.CustomerId == userId && o.Open == true);
                 if (cart != null)
                 {
-                    return cart;
+                    return Results.Ok(cart);
                 }
-                return null;
+                else
+                {
+                    Order newCart = new Order();
+                    newCart.CustomerId = userId;
+                    newCart.Open = true;
+                    db.Orders.Add(newCart);
+                    db.SaveChanges();
+                    return Results.Ok(newCart);
+                }
             });
 
             //place order

@@ -21,7 +21,7 @@ namespace Bangazon.Controllers
                 User user = db.Users.SingleOrDefault(u => u.Id == userId);
                 if (user == null)
                 {
-                    return Results.NotFound();
+                    return Results.NotFound("No such user");
                 }
                 return Results.Ok(user);
             });
@@ -36,7 +36,7 @@ namespace Bangazon.Controllers
                 }
                 db.Users.Remove(user);
                 db.SaveChanges();
-                return Results.NoContent();
+                return Results.Ok("Account deleted");
 
             });
 
