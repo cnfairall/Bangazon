@@ -36,6 +36,7 @@ namespace Bangazon.Controllers
             {
                 Order cart = db.Orders
                                 .Include(o => o.Products)
+                                .ThenInclude(p => p.Seller)
                                 .SingleOrDefault(o => o.CustomerId == userId && o.Open == true);
                 if (cart != null)
                 {
@@ -106,6 +107,7 @@ namespace Bangazon.Controllers
                 List<Order> orderHistory = db.Orders
                     .Include(o => o.Products)
                     .Where(o => o.CustomerId == userId && o.Open == false)
+                    .OrderByDescending(o => o.DatePlaced)
                     .ToList();
                 if (userId == null)
                 {

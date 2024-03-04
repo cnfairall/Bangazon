@@ -9,6 +9,12 @@
             {
                 return db.PaymentTypes;
             });
+
+            //get payment type by id
+            app.MapGet("/api/paymenttypes/{id}", (BangazonDbContext db, int id) =>
+            {
+                return db.PaymentTypes.SingleOrDefault(x => x.Id == id);
+            });
         }
     }
 }

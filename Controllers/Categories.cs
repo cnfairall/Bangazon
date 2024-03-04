@@ -1,4 +1,5 @@
 ﻿using Bangazon.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bangazon.Controllers
 {
@@ -29,6 +30,7 @@ namespace Bangazon.Controllers
             app.MapGet("/api/{categoryId}/products", (BangazonDbContext db, int categoryId) =>
             {
                 List<Product> categoryProducts = db.Products
+                                                    .Include(p => p.Seller)
                                                    .Where(p => p.CategoryId == categoryId)
                                                    .Take(3)
                                                    .ToList();

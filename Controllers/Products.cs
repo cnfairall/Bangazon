@@ -55,7 +55,7 @@ namespace Bangazon.Controllers
                
                 cart.Products.Remove(productToRemove);
                 db.SaveChanges();
-                return Results.NoContent();
+                return Results.Ok("item removed");
                 
             });
 
